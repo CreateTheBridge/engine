@@ -42,12 +42,14 @@ module Locomotive
           "_translated"
         ))
 
-        tmp = content_entry.as_json
+        relations = fields.select{|x| %w(many_to_many belongs_to has_many).include?(x[:data_type]) }.map{|y| y[:name]}
+        tmp = content_entry.as_json({
+          include: relations
+        })
 
         fields.each do |field|
           if field[:data_type] == "select"
             option = field[:options].select{|x| x["_id"].to_s == tmp["#{field[:name]}_id"]}
-
             puts option
             if option.any?
               obj["#{field[:name]}_id"] = tmp["#{field[:name]}_id"]
