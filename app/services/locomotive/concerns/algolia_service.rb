@@ -42,7 +42,7 @@ module Locomotive
           "_translated"
         ))
 
-        tmp = content_entry.to_steam.as_json
+        tmp = content_entry.as_json
 
         fields.each do |field|
           if field[:data_type] == "select"
