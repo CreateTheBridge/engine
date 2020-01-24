@@ -39,15 +39,14 @@ module Locomotive
             result[field[:name]] = add_relationships_to_serialized_object(field, content_entry)
 
           elsif field[:data_type] == "select"
-
-            option = field[:options].select{|x| x["_id"].to_s == content_hash["#{field[:name]}_id"]}
-            if option.any?
-              result["#{field[:name]}_id"] = content_hash["#{field[:name]}_id"]
-              result[field[:name]] = option[0]["name"]
+            selected_value = content_entry.send(field[:name].to_sym)
+            if selected_value.nil?
+              selected_id = content_entry.send("#{field[:name]}_id".to_sym)
+              selected_option = field[:options].select{|option| return selected_id == option["_id"] }.first
+              result[field[:name]] = selected_option["name"] if selected_option.present?
             else
-              result["#{field[:name]}_id"] = content_hash["#{field[:name]}_id"]
+              result[field[:name]] = selected_value
             end
-
           else
 
             result[field[:name]] = content_hash[field[:name]]
