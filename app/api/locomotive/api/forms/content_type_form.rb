@@ -6,7 +6,7 @@ module Locomotive
 
         attr_accessor :site
 
-        attrs :name, :slug, :description, :label_field_name,
+        attrs :name, :slug, :description, :algolia_indexing_enabled, :label_field_name,
               :order_by, :order_direction, :group_by,
               :public_submission_enabled,
               :public_submission_accounts,

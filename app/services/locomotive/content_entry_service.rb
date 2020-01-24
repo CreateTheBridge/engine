@@ -1,6 +1,6 @@
 module Locomotive
   class ContentEntryService < Struct.new(:content_type, :account)
-
+    include Locomotive::Concerns::AlgoliaService
     include Locomotive::Concerns::ActivityService
 
     # List all the entries of a content type.
@@ -54,6 +54,7 @@ module Locomotive
 
         if entry.save
           track_activity 'content_entry.created', parameters: activity_parameters(entry)
+          add_to_algolia entry
         end
       end
     end
@@ -86,6 +87,7 @@ module Locomotive
           send_notifications(entry)
 
           track_activity 'content_entry.created_public', parameters: activity_parameters(entry)
+          add_to_algolia entry
         end
       end
     end
@@ -107,6 +109,7 @@ module Locomotive
 
         if entry.save
           track_activity 'content_entry.updated', parameters: activity_parameters(entry)
+          add_to_algolia entry
         end
       end
     end
@@ -124,6 +127,7 @@ module Locomotive
     def destroy(entry)
       entry.destroy.tap do
         track_activity 'content_entry.destroyed', parameters: activity_parameters(entry)
+        remove_from_algolia entry
       end
     end
 

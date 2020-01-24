@@ -65,6 +65,9 @@ Gem::Specification.new do |s|
   s.add_dependency 'grape',                           '~> 0.12.0'
   s.add_dependency 'grape-entity',                    '0.4.5'
 
+  s.add_dependency 'algoliasearch',                   '~> 1.26.0'
+  s.add_dependency 'awesome_print',                   '~> 1.8.0'
+
   s.add_development_dependency "faye-websocket"
 
   s.files        = Dir[ 'Gemfile',

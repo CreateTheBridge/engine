@@ -20,6 +20,7 @@ module Locomotive
     field :name
     field :description
     field :slug
+    field :algolia_indexing_enabled,    type: Boolean,  default: false
     field :label_field_id,              type: BSON::ObjectId
     field :label_field_name
     field :group_by_field_id,           type: BSON::ObjectId
@@ -106,6 +107,10 @@ module Locomotive
 
     def touch_site_attribute
       :content_version
+    end
+
+    def objectID
+      self.slug
     end
 
     protected

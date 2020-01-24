@@ -38,6 +38,7 @@ module Locomotive
               requires :name
               requires :slug
               optional :description
+              optional :algolia_indexing_enabled
               requires :fields, type: Array do
                 requires :name
                 requires :type
@@ -84,6 +85,7 @@ module Locomotive
               requires :name
               optional :slug
               optional :description
+              optional :algolia_indexing_enabled
               optional :fields, type: Array do
                 requires :name
                 optional :type

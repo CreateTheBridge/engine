@@ -29,7 +29,11 @@ module Locomotive
         entitystore:  URI.encode("file:#{Rails.root}/tmp/dragonfly/cache/body")
       },
       devise_modules:               [:registerable, :rememberable, :database_authenticatable, :recoverable, :trackable, :validatable, :encryptable, { encryptor: :sha1 }],
-      steam_image_resizer_secret:   'please change it'
+      steam_image_resizer_secret:   'please change it',
+      algolia: {
+        app_id: '',
+        api_key: ''
+      }
     }
 
     cattr_accessor :settings
