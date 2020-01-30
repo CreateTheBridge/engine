@@ -1,4 +1,4 @@
-require 'spec_helper'
+# encoding: utf-8
 
 describe Locomotive::Concerns::Site::UrlRedirections do
 
@@ -35,6 +35,13 @@ describe Locomotive::Concerns::Site::UrlRedirections do
 
       let(:redirections) { ['hello_world', 'hello-world'] }
       it { is_expected.to eq([['/hello_world', '/hello-world']]) }
+
+      context 'the target is an external url' do
+
+        let(:redirections) { ['hello_world', 'https://rickandmortyrule.com'] }
+        it { is_expected.to eq([['/hello_world', 'https://rickandmortyrule.com']]) }
+
+      end
 
     end
 

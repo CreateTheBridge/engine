@@ -8,6 +8,7 @@ module CustomFields
   class Field
 
     field :ui_enabled, type: Boolean, default: true
+    field :group
 
     def class_name_to_content_type
       self._parent.send :class_name_to_content_type, self.class_name
@@ -26,9 +27,10 @@ module CustomFields
 
       class FileUploader < ::CarrierWave::Uploader::Base
 
-        include ::CarrierWave::MimeTypes
+        # TODO: (Did), not needed anymore? issue?
+        # include ::CarrierWave::MimeTypes
 
-        process :set_content_type
+        # process :set_content_type
 
         # Set correct paths
         def store_dir
@@ -37,6 +39,8 @@ module CustomFields
 
         def image?
           !(content_type =~ /image/).nil?
+        rescue Exception => e
+          Rails.logger.error("[CustomFields][FileUploader][#{model._id}] can't access the uploaded file, reason: #{e.message}")
         end
 
         # In some situations, for instance, for the notification email when a content entry is created,

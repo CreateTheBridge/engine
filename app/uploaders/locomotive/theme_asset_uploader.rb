@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 module Locomotive
-  class ThemeAssetUploader < ::CarrierWave::Uploader::Base
+  class ThemeAssetUploader < BaseUploader
 
     include Locomotive::CarrierWave::Uploader::Asset
 
@@ -9,8 +9,8 @@ module Locomotive
       self.build_store_dir('sites', model.site_id, 'theme', model.folder)
     end
 
-    def extension_white_list
-      %w(jpg jpeg gif png css js swf flv mp4 eot svg svgz ttf ttc woff woff2 otf ico htc map html cur)
+    def extension_whitelist
+      %w(jpg jpeg gif png css js swf flv mp4 eot svg svgz ttf ttc woff woff2 otf ico htc map html cur txt xml json ogv)
     end
 
     def apply_content_type_exception(value)

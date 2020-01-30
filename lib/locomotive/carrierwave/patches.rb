@@ -18,20 +18,6 @@ module CarrierWave
     uploader.url.gsub('/' + uploader.path, '')
   end
 
-  class SanitizedFile
-
-    # do not rely on Carrierwave to get the mime type of an asset.
-    # The Carrierwave mime_magic_content_type method is too unpredictable.
-    # https://github.com/locomotivecms/engine/issues/1200
-    def content_type
-      @content_type ||=
-        existing_content_type ||
-        mime_types_content_type ||
-        mime_magic_content_type
-    end
-
-  end
-
   module Uploader
 
     module Base64Download
@@ -74,12 +60,12 @@ module CarrierWave
 
       end
 
-      def download!(uri_or_base64)
+      def download!(uri_or_base64, remote_headers = {})
         if uri_or_base64 =~ /\Adata:/
           file = Base64StringIO.new(uri_or_base64)
           cache!(file)
         else
-          download_without_base64!(uri_or_base64)
+          download_without_base64!(uri_or_base64, remote_headers)
         end
       end
 
@@ -104,4 +90,48 @@ module CarrierWave
 
   end
 
+  # FIXME: The carrierwave store_dir of the ContentEntry model was not correctly set up.
+  #
+  # The consequence is the following bug:
+  #
+  # - context: a content entry has 2 file fields with 2 uploaded files sharing the same filename
+  # - action: we delete one of the 2 files.
+  # - result: the second file will be erased too.
+  #
+  # The solution is to not delete a file if inside the same model, we find another file field
+  # sharing the same file identifier.
+  #
+  module SafeRemove
+
+    def remove!
+      record.class.uploaders.each do |_column, _|
+        next if _column == column
+
+        _mounter    = self.record.send(:_mounter, _column)
+        _uploader   = self.record.send(_column)
+        _identifier = _uploader.identifier
+
+        # different uploaders, same file identifiers, we have to know if this file was aimed to be deleted too
+        # if not, we disable the deletion of the original uploader
+        if self.identifiers.include?(_identifier) && !_mounter.remove?
+          # no idea why there might be more than one uploader
+          uploaders.reject(&:blank?).each do |uploader|
+            uploader.instance_variable_set(:@file, nil)
+            uploader.instance_variable_set(:@cache_id, nil)
+          end
+
+          return false
+        end
+      end
+
+      super
+    end
+
+  end
+
+  class Mounter
+
+    prepend SafeRemove
+
+  end
 end

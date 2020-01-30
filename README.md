@@ -1,49 +1,48 @@
 # Locomotive
 
-[![Build Status](https://travis-ci.org/locomotivecms/engine.svg?branch=master)](https://travis-ci.org/locomotivecms/engine) [![Code Climate](https://codeclimate.com/github/locomotivecms/engine/badges/gpa.svg)](https://codeclimate.com/github/locomotivecms/engine) [![Dependency Status](https://gemnasium.com/locomotivecms/engine.svg)](https://gemnasium.com/locomotivecms/engine) [![Coverage Status](https://img.shields.io/coveralls/locomotivecms/engine.svg)](https://coveralls.io/r/locomotivecms/engine?branch=master) [![Join the chat at https://gitter.im/locomotivecms/engine](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/locomotivecms/engine?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.com/locomotivecms/engine.svg?branch=master)](https://travis-ci.com/locomotivecms/engine) [![Code Climate](https://codeclimate.com/github/locomotivecms/engine/badges/gpa.svg)](https://codeclimate.com/github/locomotivecms/engine) [![Coverage Status](https://img.shields.io/coveralls/locomotivecms/engine.svg)](https://coveralls.io/r/locomotivecms/engine?branch=master) [![Join the chat at https://gitter.im/locomotivecms/engine](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/locomotivecms/engine?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Locomotive is an open source platform to create, publish and edit sites (CMS). It is designed to save time and help you focus on what matters: front-end technology, standard development process and a very low learning curve for your clients.
 
 Locomotive relies on a **very original workflow**:
 
-- Sites are coded locally using our open source tool: [Wagon](https://github.com/locomotivecms/wagon). A desktop version (not open source and not tested in v3) is also available [here](http://www.wagonapp.com).
+- Sites are coded locally using our open source tool: [Wagon](https://github.com/locomotivecms/wagon).
 - Sites are deployed to the platform (engine) thanks to our internal API.
 - A back-office for the end-users is automatically generated based on the custom models and editable regions described by the developers.
 
-![Locomotive](http://i.imgur.com/iRG1gWA.jpg)
+![Locomotive](https://i.imgur.com/Qy1K4fT.jpg)
 
-Visit the Locomotive official website [here](http://
-locomotive.works) for more information.
+Visit the Locomotive official website [here](https://www.locomotivecms.com) for more information.
 
 ## Features
 
 - Multi-sites natively supported
 - Uses Liquid, a simple and clean templating language
-- Easy to add custom content types, no SQL needed
+- Easy to add custom sections, content types, no SQL needed
 - Beautiful and intuitive editing interface
 - Can fully localize all the content and pages
 - Embed a Restful API to manage every site
 - Develop and preview sites locally with your favorite tools **(Wagon)**
-- Support for SASS, HAML and Coffee Script **(Wagon)**
+- Support for Webpack, SASS, HAML and Coffee Script **(Wagon)**
 
 ## Instructions and help
 
-- [Documentation](https://locomotive-v3.readme.io/)
+- [Documentation](https://doc.locomotivecms.com/)
 - Get help with Locomotive or discuss technical issues on [Gitter](https://gitter.im/locomotivecms/engine?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) or [here](https://locomotive-v3.readme.io/discuss).
 - [Follow us on twitter](http://twitter.com/locomotivecms)
 
 ## Contribute
 
-V3 has launched! Which means a lot of stuff changed and we got bunch of new features shipped in. However, Locomotive will be updated frequently with more awesome features. Have a look at our [Trello](https://trello.com/b/kRiy1dZu/locomotive-v3) board to see what's next or see where you can help out.
+Have a look at our [Trello](https://trello.com/b/kRiy1dZu/locomotive-v3) board to see what's next or see where you can help out.
 
 ### Technologies
 
 Here is a list of the main gems used to power the Locomotive platform:
 
-- Rails 4.2   - *web framework*
+- Rails 5     - *web framework*
 - Bootstrap   - *UI framework*
-- Mongoid 5   - *Object-Document-Mapper for MongoDB 2/3*
-- Devise 3.4  - *Authentication*
+- Mongoid 6   - *Object-Document-Mapper for MongoDB 3*
+- Devise 4    - *Authentication*
 - Carrierwave - *Upload*
 - Pundit      - *Permissions*
 
@@ -61,17 +60,15 @@ Locomotive is an open source project, we encourage contributions. If you have fo
 
 - Install ruby, mongoDB and phantomjs
 - Clone the project <code>git clone git@github.com:locomotivecms/engine.git</code>
-- Setup a virtual host entry for <code>test.example.com</code> to point to localhost
+- Setup a virtual host entry for <code>locomotive.local</code> to point to localhost
 - Start mongodb if it is not already running
 - Run the tests <code>bundle exec rake</code>
 - Write your failing tests
 - Make the tests pass
 - [Create a GitHub pull request](http://help.github.com/send-pull-requests)
 
-For new features (especially large ones) it is best to create a topic on the [Google group](https://groups.google.com/forum/?fromgroups#!forum/locomotivecms) first to make sure it fits into the goals of the project.
-
 ### Contact
 
-Feel free to contact me at did at locomotivecms dot com.
+Feel free to contact me at didier at nocoffee dot fr.
 
-Copyright (c) 2017 NoCoffee, released under the MIT license
+Copyright (c) 2020 NoCoffee, released under the MIT license

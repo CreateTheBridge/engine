@@ -1,6 +1,6 @@
 module Locomotive
 
-  class PageService < Struct.new(:site, :account)
+  class PageService < Struct.new(:site, :account, :locale)
 
     include Locomotive::Concerns::ActivityService
 
@@ -41,7 +41,7 @@ module Locomotive
         page.updated_by = account if account
 
         if page.save
-          track_activity 'page.updated', parameters: { title: page.title, _id: page._id }
+          track_activity 'page.updated', locale: locale, parameters: { title: page.title, _id: page._id }
         end
       end
     end
@@ -78,14 +78,30 @@ module Locomotive
         next if locale == default_locale
 
         ::Mongoid::Fields::I18n.with_locale(locale) do
-          page.slug     ||= slug
-          page.fullpath ||= page.depth > 1 ? parent_fullpaths[page.parent_id][locale] + '/' + slug : slug
+          page.slug         ||= slug
+          page.fullpath     ||= page.depth > 1 ? parent_fullpaths[page.parent_id][locale] + '/' + slug : slug
+          page.raw_template ||= page.raw_template_translations[default_locale]
 
           if page.depth == 0 && (slug == 'index' || slug == '404')
             page.title ||= ::I18n.t("attributes.defaults.pages.#{slug}.title", locale: locale)
+          else
+            page.title ||= "#{page.title_translations[default_locale]} [#{locale.upcase}]"
           end
 
           (parent_fullpaths[page._id] ||= {})[locale] = page.fullpath
+
+          if page.redirect?
+            page.redirect_url ||= page.redirect_url_translations[default_locale]
+          end
+
+          # finally, take care of the sections (inside the dropzone and the others)
+          if page.sections_content.blank?
+            page.sections_content = page.sections_content_translations[default_locale] || {}
+          end
+
+          if page.sections_dropzone_content.blank?
+            page.sections_dropzone_content = page.sections_dropzone_content_translations[default_locale] || []
+          end
         end
       end
     end

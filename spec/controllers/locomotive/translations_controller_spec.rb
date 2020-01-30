@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Locomotive::TranslationsController do
 
   routes { Locomotive::Engine.routes }
@@ -17,8 +15,8 @@ describe Locomotive::TranslationsController do
   end
 
   describe "#GET index" do
-    subject { get :index, site_handle: site, locale: :en }
-    it { is_expected.to be_success }
+    subject { get :index, params: { site_handle: site, locale: :en } }
+    it { is_expected.to be_successful }
     specify do
       subject
       expect(assigns(:translations).all).to eq([translation])
@@ -26,8 +24,8 @@ describe Locomotive::TranslationsController do
   end
 
   describe "#GET edit" do
-    subject { get :edit, site_handle: site, id: translation.id, locale: :en }
-    it { is_expected.to be_success }
+    subject { get :edit, params: { site_handle: site, id: translation.id, locale: :en } }
+    it { is_expected.to be_successful }
     specify do
       subject
       expect(assigns(:translation)).to be_present
@@ -36,7 +34,13 @@ describe Locomotive::TranslationsController do
 
   describe "#PUT update" do
     subject do
-      put :update, site_handle: site, id: translation.id, locale: :en, translation: { values: { fr: 'foo' } }
+      put :update, params: {
+        site_handle:  site,
+        id:           translation.id,
+        locale:       :en,
+        translation:  { values: { fr: 'foo' } },
+        _location:    { filter_by: 'translated', q: 'hell' }
+      }
     end
     it { is_expected.to be_redirect }
   end

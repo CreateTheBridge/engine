@@ -5,16 +5,18 @@ module Locomotive
 
     localized
 
-    before_filter :back_to_default_site_locale, only: [:new, :create]
+    before_action :back_to_default_site_locale, only: [:new, :create]
 
-    before_filter :load_content_type
-    before_filter :load_content_entry, only: [:show, :show_in_form, :edit, :update, :destroy]
-    before_filter :store_location, only: [:edit, :update]
+    before_action :load_content_type
+    before_action :load_content_entry, only: [:show, :show_in_form, :edit, :update, :destroy]
+    before_action :store_location, only: [:edit, :update]
 
     respond_to :json, only: [:index, :sort]
     respond_to :csv,  only: [:export]
 
     helper 'Locomotive::CustomFields'
+
+    helper_method :default_location_params
 
     def index
       authorize ContentEntry
@@ -72,10 +74,16 @@ module Locomotive
       respond_with @content_type, location: content_entries_path(current_site, @content_type.slug)
     end
 
+    def bulk_destroy
+      authorize ContentEntry, :destroy?
+      service.bulk_destroy(params[:ids].split(','))
+      respond_with @content_type, location: content_entries_path(current_site, @content_type.slug, default_location_params)
+    end
+
     def destroy
       authorize @content_entry
-      service.destroy(@content_entry)
-      respond_with @content_entry, location: content_entries_path(current_site, @content_type.slug)
+      service.bulk_destroy([*params[:id]])
+      respond_with @content_type, location: content_entries_path(current_site, @content_type.slug, default_location_params)
     end
 
     private
@@ -89,7 +97,7 @@ module Locomotive
     end
 
     def service
-      @service ||= Locomotive::ContentEntryService.new(load_content_type, current_locomotive_account)
+      @service ||= Locomotive::ContentEntryService.new(load_content_type, current_locomotive_account, current_content_locale)
     end
 
     def list_params
@@ -104,8 +112,12 @@ module Locomotive
       params.require(:content_entry).permit(service.permitted_attributes)
     end
 
+    def default_location_params
+      { page: params[:page], q: params[:q] }.compact
+    end
+
     def location_after_persisting
-      default = edit_content_entry_path(current_site, @content_type.slug, @content_entry)
+      default = edit_content_entry_path(current_site, @content_type.slug, @content_entry, default_location_params)
 
       if params[:_location].present?
         last_saved_location!(default)

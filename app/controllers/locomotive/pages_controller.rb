@@ -5,9 +5,9 @@ module Locomotive
 
     localized
 
-    before_filter :back_to_default_site_locale, only: %w(new create)
+    before_action :back_to_default_site_locale, only: %w(new create)
 
-    before_filter :load_page, only: [:edit, :update, :sort, :destroy]
+    before_action :load_page, only: [:edit, :update, :sort, :destroy]
 
     respond_to :json, only: [:sort]
 
@@ -20,7 +20,7 @@ module Locomotive
     def create
       authorize Page
       @page = service.create(page_params)
-      respond_with @page, location: -> { edit_page_path(current_site, @page) }
+      respond_with @page, location: -> { edit_content_path(@page) }
     end
 
     def edit
@@ -38,7 +38,7 @@ module Locomotive
     def destroy
       authorize @page
       service.destroy(@page)
-      respond_with @page, location: editable_elements_path(current_site, current_site.pages.root.first)
+      respond_with @page, location: edit_content_path(current_site.pages.root.first)
     end
 
     def sort
@@ -58,7 +58,16 @@ module Locomotive
     end
 
     def service
-      @service ||= Locomotive::PageService.new(current_site, current_locomotive_account)
+      @service ||= Locomotive::PageService.new(current_site, current_locomotive_account, current_content_locale)
+    end
+
+    def edit_content_path(page)
+      # FIXME: keep the compatibility with the old system using the editable elements
+      if current_site.sections.count == 0
+        edit_page_path(current_site, page)
+      else
+        edit_page_content_path(current_site, page)
+      end
     end
 
   end

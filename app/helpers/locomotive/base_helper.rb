@@ -29,10 +29,11 @@ module Locomotive
       end
     end
 
-    def help(text)
-      if text.present?
-        content_tag :p, text, class: 'text'
+    def help(text = nil)
+      if text.nil?
+        @content_for_help
       else
+        @content_for_help = content_tag(:p, text, class: 'text')
         ''
       end
     end
@@ -283,6 +284,30 @@ module Locomotive
       count          = current_site.content_types.count
       max_updated_at = current_site.content_types.max(:updated_at).try(:utc).try(:to_s, :number).to_i
       base_cache_key_for_sidebar + ['content_types', count, max_updated_at]
+    end
+
+    # Steam helpers
+
+    def decorated_steam_content_entry(content_entry)
+      Locomotive::Steam::Decorators::I18nDecorator.new(
+        content_entry.to_steam,
+        current_content_locale,
+        current_site.default_locale
+      )
+    end
+
+    def decorated_steam_page(page, locale = nil)
+      Locomotive::Steam::Decorators::PageDecorator.new(
+        page.to_steam,
+        locale || current_content_locale,
+        current_site.default_locale
+      )
+    end
+
+    def steam_url_builder
+      return @steam_url_builder if @steam_url_builder
+
+      @steam_url_builder = Locomotive::Steam::Services.build_simple_instance(current_site).url_builder
     end
 
   end

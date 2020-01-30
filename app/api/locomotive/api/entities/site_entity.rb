@@ -4,10 +4,10 @@ module Locomotive
 
       class SiteEntity < BaseEntity
 
-        expose    :name, :handle, :seo_title, :meta_keywords, :meta_description,
-                  :robots_txt, :cache_enabled, :private_access
+        expose  :name, :handle, :seo_title, :meta_keywords, :meta_description,
+                :robots_txt, :cache_enabled, :private_access
 
-        expose :locales, :domains, :asset_host, :url_redirections
+        expose :locales, :prefix_default_locale, :bypass_browser_locale, :domains, :asset_host, :url_redirections
 
         expose :memberships, using: MembershipEntity
 
@@ -49,6 +49,14 @@ module Locomotive
 
         expose :metafields_ui do |site, opts|
           site.metafields_ui.to_json
+        end
+
+        expose :sections_content do |site, opts|
+          site.sections_content&.to_json
+        end
+
+        expose :routes do |site, opts|
+          site.routes&.to_json
         end
 
       end

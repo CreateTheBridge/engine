@@ -1,8 +1,7 @@
-require 'spec_helper'
-
 describe 'locomotive/memberships/new', type: :view do
 
   helper(Locomotive::BaseHelper, Locomotive::SitesHelper, Locomotive::Engine.routes.url_helpers)
+  helper(Locomotive::TestViewHelpers)
 
   let(:site)        { build('test site') }
   let(:membership)  { site.memberships.first }

@@ -1,13 +1,12 @@
-# coding: utf-8
-
-require 'spec_helper'
+# encoding: utf-8
 
 describe Locomotive::ContentEntryService do
 
   let(:site)          { create('test site') }
   let(:account)       { create(:account) }
   let(:content_type)  { create_content_type }
-  let(:service)       { described_class.new(content_type, account) }
+  let(:locale)        { :en }
+  let(:service)       { described_class.new(content_type, account, locale) }
 
   describe '#all' do
 
@@ -111,6 +110,19 @@ describe Locomotive::ContentEntryService do
 
   end
 
+  describe '#bulk_destroy' do
+
+    let!(:entry_1) { create_content_entry(title: 'Hello world', body: 'Lorem ipsum', published: true) }
+    let!(:entry_2) { create_content_entry(title: 'Bla bla', body: 'Lorem ipsum', published: false) }
+    let!(:entry_3) { create_content_entry(title: 'Rick & Morty', body: 'Lorem ipsum', published: false) }
+
+    subject { service.bulk_destroy([entry_1._id, entry_3._id]) }
+
+    it { expect { subject }.to change(content_type.entries, :count).by(-2) }
+
+  end
+
+
   describe '#create' do
 
     let(:attributes) { { title: 'Hello world', body: 'Lorem ipsum', published: true } }
@@ -140,6 +152,16 @@ describe Locomotive::ContentEntryService do
 
     it { expect(subject.title).to eq 'Goodbye' }
     it { expect(subject.updated_by).to eq account }
+
+    it 'tracks the operation as an activity' do
+      expect(service).to receive(:track_activity).with('content_entry.updated', locale: :en, parameters: {
+        _id:                entry._id,
+        content_type:       'Articles',
+        content_type_slug:  content_type.slug,
+        label:              'Goodbye'
+      })
+      subject
+    end
 
   end
 
@@ -187,11 +209,20 @@ describe Locomotive::ContentEntryService do
   describe '#public_create' do
 
     let(:attributes) { { title: 'Hello world', body: 'Lorem ipsum' } }
+    let(:options) { {} }
 
-    subject { service.public_create(attributes) }
+    subject { service.public_create(attributes, options) }
 
     it { expect { subject }.to change { content_type.entries.count } }
     it { expect(service).to receive(:send_notifications); subject }
+
+    context 'with notified accounts' do
+
+      let(:options) { { emails: ['john@doe.net', 'jane@doe.net'] } }
+
+      it { expect(service).to receive(:send_notifications).with(any_args, ['john@doe.net', 'jane@doe.net']); subject }
+
+    end
 
     context 'invalid' do
 
@@ -207,12 +238,13 @@ describe Locomotive::ContentEntryService do
   describe '#send_notifications' do
 
     let(:enabled)       { true }
-    let(:account_1)     { create(:designer, site: site).account }
-    let(:account_2)     { create('brazillian user') }
-    let(:content_type)  { create_content_type(public_submission_enabled: enabled, public_submission_accounts: ['', account_1._id, account_2._id]) }
+    let!(:account_1)    { create(:designer, site: site).account }
+    let!(:account_2)    { create('brazillian user', email: 'juan@doe.br') }
+    let(:emails)        { nil }
+    let(:content_type)  { create_content_type(public_submission_enabled: enabled, public_submission_accounts: ['', account_1._id]) }
     let(:entry)         { create_content_entry(title: 'Shoot an email', body: 'now') }
 
-    subject { service.send_notifications(entry) }
+    subject { service.send_notifications(entry, emails) }
 
     context 'public_submission disabled' do
 
@@ -230,12 +262,60 @@ describe Locomotive::ContentEntryService do
         subject
       end
 
+      context 'external accounts' do
+
+        let(:emails) { ['juan@doe.br'] }
+
+        it 'sends email notifications to external accounts' do
+          expect(Locomotive::Notifications).to receive(:new_content_entry).with(account_1, entry).and_return(instance_double('mailer', deliver: true))
+          expect(Locomotive::Notifications).to receive(:new_content_entry).with(account_2, entry).and_return(instance_double('mailer', deliver: true))
+          subject
+        end
+
+      end
+
+    end
+
+  end
+
+  describe '#sanitize_attributes!' do
+
+    let(:attributes) { { title: 'My first article' } }
+
+    subject { service.send(:sanitize_attributes!, attributes); attributes }
+
+    it { is_expected.to eq({ title: 'My first article' }) }
+
+    context 'with a many_to_many field' do
+
+      let(:attributes) { { name: 'John Doe', 'article_ids' => [42] } }
+      let(:ui_enabled) { true }
+      let(:another_content_type) { create_and_link_another_content_type(ui_enabled: ui_enabled) }
+      let(:service) { described_class.new(another_content_type, account) }
+
+      it { is_expected.to eq({ name: 'John Doe', 'article_ids' => [42] }) }
+
+      context 'there is no value for this field' do
+
+        let(:attributes) { { name: 'John Doe' } }
+        it { is_expected.to eq({ name: 'John Doe', 'article_ids' => [] }) }
+
+      end
+
+      context 'the many_to_many field is not displayed' do
+
+        let(:ui_enabled) { false }
+        let(:attributes) { { name: 'John Doe' } }
+        it { is_expected.to eq({ name: 'John Doe' }) }
+
+      end
+
     end
 
   end
 
   def create_content_type(attributes = {})
-    FactoryGirl.build(:content_type, site: site, name: 'Articles').tap do |content_type|
+    build(:content_type, site: site, name: 'Articles').tap do |content_type|
       content_type.entries_custom_fields.build(name: 'title', type: 'string', label: 'Title', localized: true)
       content_type.entries_custom_fields.build(name: 'body', type: 'text', label: 'Body', localized: true)
       content_type.entries_custom_fields.build(name: 'published', type: 'boolean', label: 'Published')
@@ -243,6 +323,21 @@ describe Locomotive::ContentEntryService do
       content_type.attributes = attributes
 
       content_type.save!
+    end.reload
+  end
+
+  def create_and_link_another_content_type(ui_enabled: true)
+    build(:content_type, site: site, name: 'Authors').tap do |_content_type|
+      _content_type.entries_custom_fields.build(name: 'name', type: 'string', label: 'Name')
+      _content_type.save!
+    end.reload.tap do |content_type_2|
+      article_klass = content_type.klass_with_custom_fields(:entries).name
+      author_klass  = content_type_2.klass_with_custom_fields(:entries).name
+
+      content_type.entries_custom_fields.build(name: 'authors', type: 'many_to_many', label: 'Authors', class_name: author_klass, inverse_of: :articles)
+      content_type_2.entries_custom_fields.build(name: 'articles', type: 'many_to_many', label: 'Articles', class_name: article_klass, inverse_of: :authors, ui_enabled: ui_enabled)
+
+      [content_type, content_type_2].map(&:save!)
     end.reload
   end
 

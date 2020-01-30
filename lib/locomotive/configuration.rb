@@ -1,7 +1,8 @@
 module Locomotive
   class Configuration
 
-    @@default_locales = %w{en de fr bg ca cs da el es et fa-IR fi-FI it ja-JP lt nb nl pl-PL pt pt-BR ru sk sr sv sv-FI uk zh-CN}
+    @@default_locales = %w{en de fr bg cs da el es ca fa-IR fi-FI it ja-JP lt nl pl-PL pt pt-BR ru sv sv-FI uk zh-CN}
+    @@site_locales    = @@default_locales + %w{hr et nb sk sl sr}
 
     @@defaults = {
       name:                         'Locomotive',
@@ -11,7 +12,7 @@ module Locomotive
       reserved_slugs:               %w{stylesheets javascripts assets admin locomotive images api pages edit},
       reserved_domains:             [],
       locales:                      @@default_locales,
-      site_locales:                 @@default_locales,
+      site_locales:                 @@site_locales,
       cookie_key:                   '_locomotive_session',
       enable_logs:                  false,
       enable_admin_ssl:             false,
@@ -20,6 +21,7 @@ module Locomotive
       mailer_sender:                'support@example.com',
       unsafe_token_authentication:  false,
       enable_registration:          true,
+      optimize_uploaded_files:      false,
       ui:                     {
         per_page:     10
       },
@@ -48,6 +50,10 @@ module Locomotive
 
     def method_missing(name, *args, &block)
       self.settings.send(name, *args, &block)
+    end
+
+    def respond_to?(name, include_all = false)
+      self.settings.keys.include?(name.to_sym) || super
     end
 
     protected

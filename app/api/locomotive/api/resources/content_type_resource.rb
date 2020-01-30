@@ -55,18 +55,22 @@ module Locomotive
                 optional :inverse_of
                 optional :order_by
                 optional :ui_enabled
+                optional :group
               end
               optional :order_by
               optional :order_direction
               optional :group_by
               optional :label_field_name
+              optional :tree_parent_field_name
               optional :entry_template
               optional :raw_item_template # deprecated
               optional :display_settings
               optional :filter_fields
               optional :public_submission_enabled
+              optional :recaptcha_required
               optional :public_submission_account_emails
               optional :public_submission_title_template
+              optional :public_submission_email_attachments
             end
           end
           post do
@@ -102,12 +106,14 @@ module Locomotive
                 optional :inverse_of
                 optional :order_by
                 optional :ui_enabled
+                optional :group
                 optional :_destroy
               end
               optional :order_by
               optional :order_direction
               optional :group_by
               optional :label_field_name
+              optional :tree_parent_field_name
               optional :entry_template
               optional :raw_item_template # deprecated
               optional :display_settings
@@ -115,6 +121,8 @@ module Locomotive
               optional :public_submission_enabled
               optional :public_submission_account_emails
               optional :public_submission_title_template
+              optional :public_submission_email_attachments
+              optional :recaptcha_required
             end
           end
           put ':id' do

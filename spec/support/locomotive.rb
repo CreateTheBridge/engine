@@ -12,6 +12,25 @@ module Locomotive
     end
 
   end
+
+  module TestViewHelpers
+
+    def current_site
+    end
+
+    def policy(object = nil)
+    end
+
+    def current_locomotive_account
+    end
+
+    def last_saved_location
+    end
+
+    def translation_nav_params
+    end
+
+  end
 end
 
 def Locomotive.configure_for_test(force = false)
@@ -23,9 +42,7 @@ def Locomotive.configure_for_test(force = false)
     if force
       Locomotive.send(:remove_const, 'Site') if Locomotive.const_defined?('Site')
       load 'locomotive/site.rb'
-
-      FactoryGirl.factories.clear
-      load File.join(File.dirname(__FILE__), 'factories.rb')
     end
   end
 end
+

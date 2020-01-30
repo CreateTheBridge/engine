@@ -18,10 +18,20 @@ fr:
       zh-CN: Chinois
       cs: Tchèque
       bg: Bulgare
+      hr: Croate
       sk: Slovaque
+      sl: Slovène
       sr: Serbe
       sv: Suédois
       el: Grec
+      ca: Catalan
+      uk: Ukrainien
+      fa-IR: Perse
+      ja-JP: Japonais
+      pl-PL: Polonais
+      sv-FI: Suédois/Finnois
+      fi-FI: 'Finnois '
+      da: Danois
     messages:
       confirm: Êtes-vous sûr ?
       unsaved_content_warning: "Vous avez des modifications non sauvegardées dans cette page. Si vous la quittez, ces modifications seront perdues."
@@ -73,6 +83,8 @@ fr:
           create_account: "Veuillez créer un compte avant de créer un site"
           add_domain: "Ajoutez le domaine <strong>%{host}</strong>  à la liste de domaines de l'un de vos sites."
           sign_in: "Veuillez d'abord vous identifier. Puis, ajoutez le domaine <strong>%{host}</strong> à la liste de domaines de l'un de vos sites."
+      access_denied:
+        message: "Vous n'êtes pas autorisé(e) à effectuer cette action. Veuillez contacter l'administrateur du site pour de l'aide."
     notifications:
       new_content_entry:
         subject: "[%{domain}][%{type}] nouvelle entité"
@@ -86,6 +98,8 @@ fr:
         updated: 'a mis à jour la page %{page} '
         destroyed: 'a supprimé la page %{page} '
         sorted: 'a trié les pages'
+      page_content:
+        updated: 'a modifié le contenu de la page %{page}'
       editable_element:
         updated_bulk: 'a modifié le contenu de %{pages} '
       content_entry:
@@ -94,6 +108,7 @@ fr:
         updated: 'a mis à jour %{entry} de %{content_type}'
         destroyed: 'a supprimé %{entry} de %{content_type}'
         sorted: 'a trié  %{content_type}'
+        destroyed_bulk: 'a supprimé %{entry} de %{content_type}'
       content_asset:
         created_bulk: 'a mis à jour %{count} média(s)'
         destroyed: 'a supprimé le média %{name}'
@@ -313,6 +328,7 @@ fr:
         title: '%{type}'
         download: télécharger les élements
         new: nouvel élément
+        bulk_destroy: supprimer les éléments
         edit_notification_settings: Modifier les paramètres de notifications
         search_placeholder: "Entrez vos critères de recherche ici"
         group_by:

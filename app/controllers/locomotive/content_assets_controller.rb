@@ -3,10 +3,10 @@ module Locomotive
 
     account_required & within_site
 
-    respond_to :json, only: [:create, :bulk_create]
+    respond_to :json, only: [:index, :create, :bulk_create]
 
-    before_filter :load_content_assets, only: :index
-    before_filter :load_content_asset,  only: [:edit, :update, :destroy]
+    before_action :load_content_assets, only: :index
+    before_action :load_content_asset,  only: [:edit, :update, :destroy]
 
     def index
       authorize Locomotive::ContentAsset
@@ -22,6 +22,7 @@ module Locomotive
     end
 
     def bulk_create
+      authorize Locomotive::ContentAsset, :create?
       @content_assets = service.bulk_create(content_assets_params)
       respond_with @content_assets, location: content_assets_path
     end

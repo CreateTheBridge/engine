@@ -7,6 +7,14 @@ module Locomotive
         resource :pages do
           entity_klass = Entities::PageEntity
 
+          helpers do
+
+            def url_builder
+              Locomotive::Steam::Services.build_simple_instance(current_site).url_builder
+            end
+
+          end
+
           before do
             setup_resource_methods_for(:pages)
             authenticate_locomotive_account!
@@ -16,14 +24,14 @@ module Locomotive
           get '/' do
             authorize Page, :index?
 
-            present pages, with: entity_klass, site: current_site
+            present pages, with: entity_klass, site: current_site, url_builder: url_builder
           end
 
           desc 'Only full path of pages'
           get '/fullpaths' do
             authorize Page, :index?
 
-            present pages.only(:_id, :fullpath, :handle), with: Locomotive::API::Entities::FullpathPageEntity
+            present pages.only(:id, :fullpath, :handle), with: Locomotive::API::Entities::FullpathPageEntity
           end
 
           desc "Show a page"
@@ -34,7 +42,7 @@ module Locomotive
             get do
               authorize(page, :show?)
 
-              present page, with: entity_klass, site: current_site
+              present page, with: entity_klass, site: current_site, url_builder: url_builder
             end
           end
 
@@ -57,6 +65,8 @@ module Locomotive
               optional :is_layout, type: Boolean
               optional :allow_layout, type: Boolean
               optional :editable_elements, type: Array
+              optional :sections_content, type: String
+              optional :sections_dropzone_content, type: String
               optional :cache_enabled
               optional :seo_title
               optional :meta_keywords
@@ -70,9 +80,10 @@ module Locomotive
             back_to_default_site_locale
 
             form = form_klass.new(current_site, page_params)
+
             persist_from_form(form)
 
-            present page, with: entity_klass, site: current_site
+            present page, with: entity_klass, site: current_site, url_builder: url_builder
           end
 
           desc 'Update a page'
@@ -94,6 +105,8 @@ module Locomotive
               optional :allow_layout, type: Boolean
               optional :template
               optional :editable_elements, type: Array
+              optional :sections_content, type: String
+              optional :sections_dropzone_content, type: String
               optional :cache_enabled
               optional :seo_title
               optional :meta_keywords
@@ -107,7 +120,7 @@ module Locomotive
 
             persist_from_form(form)
 
-            present page, with: entity_klass, site: current_site
+            present page, with: entity_klass, site: current_site, url_builder: url_builder
           end
 
           desc 'Delete a page'
@@ -124,7 +137,7 @@ module Locomotive
 
             page.destroy
 
-            present page, with: entity_klass, site: current_site
+            present page, with: entity_klass, site: current_site, url_builder: url_builder
           end
 
         end

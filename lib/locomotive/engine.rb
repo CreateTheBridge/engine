@@ -1,15 +1,11 @@
-require 'locomotive/dependencies'
-require 'locomotive'
-
-$:.unshift File.dirname(__FILE__) # TODO: not sure about that, looks pretty useless
-
 module Locomotive
-  class Engine < Rails::Engine
-
+  class Engine < ::Rails::Engine
     isolate_namespace Locomotive
 
     paths['mongodb/migrate'] = 'mongodb/migrate'
 
+    # Allow the root app to change the behavior of Locomotive controllers and
+    # models in a clean way.
     config.to_prepare do
       Dir.glob(Rails.root + 'app/decorators/**/*_decorator*.rb').each do |c|
         require_dependency(c)
@@ -37,6 +33,7 @@ module Locomotive
       app.config.assets.precompile += %w(
         locomotive/icons/flags/*.png
         locomotive/*.png
+        locomotive/*.gif
         locomotive/bootstrap-colorpicker/saturation.png
         locomotive/bootstrap-colorpicker/alpha-horizontal.png
         locomotive/bootstrap-colorpicker/alpha.png
@@ -48,6 +45,8 @@ module Locomotive
         locomotive.css
         locomotive/account.js
         locomotive/account.css
+        locomotive/editor.js
+        locomotive/editor.css
         locomotive/live_editing_iframe.css
         locomotive/live_editing_error.css
         locomotive/error.css)
@@ -67,8 +66,8 @@ module Locomotive
 
       # Note: "insert 4" means inserting after Rack::Lock
       # specifying Rack::Lock caused an error in production.
-      app.middleware.insert 4, '::Locomotive::Middlewares::ImageThumbnail'
-      app.middleware.use '::Locomotive::Middlewares::Site'
+      app.middleware.insert 4, ::Locomotive::Middlewares::ImageThumbnail
+      app.middleware.use ::Locomotive::Middlewares::Site
     end
 
     initializer 'locomotive.i18n' do |app|

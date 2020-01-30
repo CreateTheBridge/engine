@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Locomotive::SitesController do
 
   routes { Locomotive::Engine.routes }
@@ -16,8 +14,8 @@ describe Locomotive::SitesController do
   end
 
   describe "#GET new" do
-    subject { get :new, locale: :en }
-    it { is_expected.to be_success }
+    subject { get :new, params: { locale: :en } }
+    it { is_expected.to be_successful }
   end
 
   describe "#POST create" do
@@ -25,7 +23,7 @@ describe Locomotive::SitesController do
       { handle: generate(:handle), name: generate(:name) }
     end
     subject do
-      post :create, locale: :en, site: site_attributes
+      post :create, params: { locale: :en, site: site_attributes }
     end
     it { is_expected.to be_redirect }
     specify do

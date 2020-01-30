@@ -1,4 +1,4 @@
-require 'spec_helper'
+# encoding: utf-8
 
 describe Locomotive::PagePolicy do
 
@@ -13,14 +13,14 @@ describe Locomotive::PagePolicy do
     context 'admin' do
 
       let(:membership) { build(:admin) }
-      it { is_expected.to eq([:title, :layout_id, :slug, :parent_id, :listed, :published, :redirect, :redirect_url, :redirect_type, :seo_title, :meta_description, :meta_keywords, :cache_enabled, :handle]) }
+      it { is_expected.to eq([:title, :layout_id, :slug, :parent_id, :listed, :published, :redirect, :redirect_url, :redirect_type, :seo_title, :meta_description, :meta_keywords, :cache_enabled, :cache_control, :cache_vary, :handle]) }
 
     end
 
     context 'author' do
 
       let(:membership) { build(:author) }
-      it { is_expected.to eq([:title, :layout_id, :slug, :parent_id, :listed, :published, :redirect, :redirect_url, :redirect_type, :seo_title, :meta_description, :meta_keywords, :cache_enabled]) }
+      it { is_expected.to eq([:title, :layout_id, :slug, :parent_id, :listed, :published, :redirect, :redirect_url, :redirect_type, :seo_title, :meta_description, :meta_keywords]) }
 
     end
 
@@ -46,6 +46,29 @@ describe Locomotive::PagePolicy do
         it { is_expected.to eq false }
       end
 
+
+    end
+
+  end
+
+  describe "#destroy?" do
+
+    subject { policy.destroy? }
+
+    let(:membership) { build(:admin) }
+    it { is_expected.to eq true }
+
+    context 'index page' do
+
+      let(:page) { build(:page, slug: 'index', depth: 0) }
+      it { is_expected.to eq false }
+
+    end
+
+    context '404 page' do
+
+      let(:page) { build(:page, slug: '404', depth: 0) }
+      it { is_expected.to eq false }
 
     end
 

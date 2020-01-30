@@ -4,7 +4,6 @@ module Locomotive
     include Locomotive::Mongoid::Document
     devise *Locomotive.config.devise_modules
     acts_as_token_authenticatable
-    include Locomotive::Concerns::Account::DevisePatch
     include Locomotive::Concerns::Account::ApiKey
 
     ## devise fields (need to be declared since 2.x) ##
@@ -27,6 +26,7 @@ module Locomotive
     field :name
     field :locale,  default: Locomotive.config.default_locale.to_s or 'en'
     field :super_admin, type: Boolean, default: false
+    field :visitor, type: Boolean, default: false
 
     ## validations ##
     validates_presence_of :name

@@ -1,3 +1,4 @@
+require 'locomotive/dependencies'
 require 'locomotive/version'
 require 'locomotive/core_ext'
 require 'locomotive/configuration'
@@ -14,6 +15,7 @@ require 'locomotive/custom_fields'
 require 'locomotive/action_controller'
 require 'locomotive/rails'
 require 'locomotive/regexps'
+require 'locomotive/engine'
 
 module Locomotive
   extend ActiveSupport::Autoload
@@ -39,12 +41,6 @@ module Locomotive
     # Devise
     mail_address = self.config.mailer_sender
     ::Devise.mailer_sender = mail_address =~ /.+@.+/ ? mail_address : "#{mail_address}@#{Locomotive.config.domain}"
-
-    # cookies stored in mongodb (mongoid_store)
-    Rails.application.config.session_store :mongoid_store, {
-      key:    self.config.cookie_key,
-      domain: :all
-    }
 
     # Check for outdated Dragonfly config
     if ::Dragonfly::VERSION =~ /^0\.9\.([0-9]+)/

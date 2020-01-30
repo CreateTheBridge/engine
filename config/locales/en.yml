@@ -18,12 +18,15 @@ en:
       zh-CN: Chinese
       cs: Czech
       bg: Bulgarian
+      hr: Croatian
       sk: Slovak
+      sl: Slovenian
       sr: Serbian
       sv: Swedish
       el: Greek
       ca: Catalan
       uk: Ukrainian
+      fa-IR: Persian
       ja-JP: Japanese
       pl-PL: Polish
       sv-FI: Swedish/Finnish
@@ -46,7 +49,7 @@ en:
         dashboard: Dashboard
         assets: Assets
         pages: Pages
-        settings: General Settings
+        settings: Site Administration
         metafields: Properties
         developers: Developers
         content_types:
@@ -84,6 +87,8 @@ en:
           create_account: "Please create an account first and then create a site."
           add_domain: "Add the <strong>%{host}</strong> domain to the list of domains of one of your sites."
           sign_in: "Please sign in first. Then, add the <strong>%{host}</strong> domain to the list of domains of one of your sites."
+      access_denied:
+        message: "You're not allowed to perform this action. Contact your site administrator for some help."
 
     notifications:
       new_content_entry:
@@ -99,6 +104,8 @@ en:
         updated: 'updated the %{page} page'
         destroyed: 'deleted the %{page} page'
         sorted: 'sorted pages'
+      page_content:
+        updated: 'modified the content of %{page}'
       editable_element:
         updated_bulk: 'modified the content of %{pages}'
       content_entry:
@@ -107,6 +114,7 @@ en:
         updated: 'updated %{entry} from %{content_type}'
         destroyed: 'deleted %{entry} from %{content_type}'
         sorted: 'sorted %{content_type}'
+        destroyed_bulk: 'deleted %{entry} from %{content_type}'
       content_asset:
         created_bulk: 'uploaded %{count} asset(s)'
         destroyed: 'deleted the %{name} asset'
@@ -255,7 +263,7 @@ en:
 
     current_site:
       edit:
-        title: Editing the current site
+        title: Site Administration
       form:
         main:
           new_membership: "Add account"
@@ -353,8 +361,9 @@ en:
     content_entries:
       index:
         title: '%{type}'
-        download: download entries
-        new: new entry
+        download: Download entries
+        new: New entry
+        bulk_destroy: Delete entries
         edit_notification_settings: Edit notification settings
         search_placeholder: "Enter your search keywords here"
         group_by:

@@ -1,11 +1,9 @@
 # encoding: utf-8
 
 module Locomotive
-  class PictureUploader < ::CarrierWave::Uploader::Base
+  class PictureUploader < BaseUploader
 
-    include ::CarrierWave::MimeTypes
-
-    def extension_white_list
+    def extension_whitelist
       %w(jpg jpeg gif png)
     end
 

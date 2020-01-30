@@ -6,15 +6,16 @@ module Locomotive
 
       localized
 
-      before_filter :load_content_type
-      before_filter :load_custom_field
+      before_action :load_content_type
+      before_action :load_custom_field
 
       def edit
         respond_with @custom_field
       end
 
       def update
-        @options = service.update_select_options(options_params)
+        authorize ContentEntry
+        @options = service.update_select_options(options_params.map(&:to_h))
         respond_with @custom_field, location: -> { last_saved_location!(default_back_location) }
       end
 
@@ -38,7 +39,7 @@ module Locomotive
       end
 
       def service
-        @service ||= Locomotive::CustomFieldService.new(@custom_field)
+        @service ||= Locomotive::CustomFieldService.new(@custom_field, current_content_locale)
       end
 
       def options_params

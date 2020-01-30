@@ -66,12 +66,16 @@ module Locomotive
               optional :timezone
               optional :picture
               optional :cache_enabled
+              optional :cache_control
+              optional :cache_vary
               optional :private_access
               optional :password
               optional :metafields_schema
               optional :metafields
               optional :metafields_ui
               optional :asset_host
+              optional :sections_content
+              optional :routes
             end
           end
           post do
@@ -95,23 +99,28 @@ module Locomotive
               optional :robots_txt
               optional :locales, type: Array
               optional :domains, type: Array
+              optional :prefix_default_locale
+              optional :bypass_browser_locale
               optional :timezone
               optional :picture
               optional :cache_enabled
+              optional :cache_control
+              optional :cache_vary
               optional :private_access
               optional :password
               optional :metafields_schema
               optional :metafields
               optional :asset_host
+              optional :sections_content
+              optional :routes
             end
           end
           put ':id' do
             site = load_site
             authorize site, :update?
 
-            site_form = Forms::SiteForm.new(permitted_params_from_policy(site, :site, [:picture]))
-            site.assign_attributes(site_form.serializable_hash)
-            site.save!
+            site_form = Forms::SiteForm.new(permitted_params_from_policy(site, :site, [:picture], [:metafields_ui, :metafields_schema, :metafields, :routes, :sections_content]))
+            service.update!(site, site_form.serializable_hash)
 
             present site, with: entity_klass
           end

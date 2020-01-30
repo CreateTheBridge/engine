@@ -1,12 +1,11 @@
-# coding: utf-8
-
-require 'spec_helper'
+# encoding: utf-8
 
 describe Locomotive::PageService do
 
   let!(:site)     { create(:site) }
   let(:account)   { create(:account) }
-  let(:service)   { described_class.new(site, account) }
+  let(:locale)    { :en }
+  let(:service)   { described_class.new(site, account, locale) }
 
   describe '#create' do
 
@@ -55,9 +54,44 @@ describe Locomotive::PageService do
       subject { sub_page.reload }
 
       it 'sets the slug and the fullpath but not the title' do
-        expect(subject.title_translations).to eq('en' => 'Subpage')
+        expect(subject.title_translations).to eq('en' => 'Subpage', 'fr' => 'Subpage [FR]')
         expect(subject.slug_translations).to eq('en' => 'subpage', 'fr' => 'subpage')
         expect(subject.fullpath_translations).to eq('en' => 'subpage', 'fr' => 'subpage')
+        expect(subject.raw_template_translations).to eq({
+          'en' => '<html><body><h1>Hello world</h1></body></html>',
+          'fr' => '<html><body><h1>Hello world</h1></body></html>'
+        })
+      end
+
+      context 'with sections' do
+
+        let(:sections_content) { { banner: { settings: { title: 'Hello world' }, blocks: [] } } }
+        let(:sections_dropzone_content) { [
+          { type: 'gallery', settings: { title: 'My gallery of photos' }, blocks: [] },
+          { type: 'testimonials', settings: { title: 'What our clients say' }, blocks: [] }
+        ] }
+        let!(:sub_page) { create(:sub_page, site: site, sections_content: sections_content, sections_dropzone_content: sections_dropzone_content) }
+
+        it 'copies the sections content in the new locale' do
+          expect(subject.sections_content_translations).to eq({
+            'en' => { 'banner' => { 'settings' => { 'title' => 'Hello world' }, 'blocks' => [] } },
+            'fr' => { 'banner' => { 'settings' => { 'title' => 'Hello world' }, 'blocks' => [] } }
+          })
+        end
+
+        it 'copies the sections dropzone content in the new locale' do
+          expect(subject.sections_dropzone_content_translations).to eq({
+            'en' => [
+              { 'type' => 'gallery', 'settings' => { 'title' => 'My gallery of photos' }, 'blocks' => [] },
+              { 'type' => 'testimonials', 'settings' => { 'title' => 'What our clients say' }, 'blocks' => [] }
+            ],
+            'fr' => [
+              { 'type' => 'gallery', 'settings' => { 'title' => 'My gallery of photos' }, 'blocks' => [] },
+              { 'type' => 'testimonials', 'settings' => { 'title' => 'What our clients say' }, 'blocks' => [] }
+            ]
+          })
+        end
+
       end
 
     end
@@ -67,7 +101,7 @@ describe Locomotive::PageService do
       subject { sub_sub_page.reload }
 
       it 'sets the slug and the fullpath but not the title' do
-        expect(subject.title_translations).to eq('en' => 'Sub sub page')
+        expect(subject.title_translations).to eq('en' => 'Sub sub page', 'fr' => 'Sub sub page [FR]')
         expect(subject.slug_translations).to eq('en' => 'subpage', 'fr' => 'subpage')
         expect(subject.fullpath_translations).to eq('en' => 'subpage/subpage', 'fr' => 'subpage/subpage')
       end

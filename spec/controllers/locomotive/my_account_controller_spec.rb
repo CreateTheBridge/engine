@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Locomotive::MyAccountController do
 
   routes { Locomotive::Engine.routes }
@@ -16,8 +14,8 @@ describe Locomotive::MyAccountController do
   end
 
   describe "#GET edit" do
-    subject { get :edit, site_handle: site, id: account.id, locale: :en }
-    it { is_expected.to be_success }
+    subject { get :edit, params: { site_handle: site, id: account.id, locale: :en } }
+    it { is_expected.to be_successful }
     specify do
       subject
       expect(assigns(:account)).to be_present
@@ -27,7 +25,7 @@ describe Locomotive::MyAccountController do
   describe "#PUT update" do
     let(:name) { generate(:name) }
     subject do
-      put :update, site_handle: site, id: account.id, locale: :en, account: { name: name }
+      put :update, params: { site_handle: site, id: account.id, locale: :en, account: { name: name } }
     end
     it { is_expected.to be_redirect }
     specify do
@@ -40,6 +38,6 @@ describe Locomotive::MyAccountController do
     subject do
       put :regenerate_api_key, format: :json
     end
-    it { is_expected.to be_success }
+    it { is_expected.to be_successful }
   end
 end

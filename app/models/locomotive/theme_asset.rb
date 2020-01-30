@@ -7,7 +7,6 @@ module Locomotive
     include Concerns::Shared::SiteScope
     include Concerns::Asset::Types
     include Concerns::Asset::Checksum
-    include Concerns::ThemeAsset::PlainText
 
     ## fields ##
     field :local_path
@@ -30,7 +29,6 @@ module Locomotive
     ## validations ##
     validates_presence_of   :source, on: :create
     validates_uniqueness_of :local_path, scope: :site_id
-    validate                :content_type_can_not_change
 
     ## named scopes ##
 
@@ -78,7 +76,7 @@ module Locomotive
       self.folder = ActiveSupport::Inflector.transliterate(self.folder).gsub(/(\s)+/, '_').gsub(/^\//, '').gsub(/\/$/, '')
 
       # folder should begin by a root folder
-      if (self.folder =~ /^(stylesheets|javascripts|images|media|fonts|pdfs|others)($|\/)+/).nil?
+      if (self.folder =~ /^(stylesheets|javascripts|images|media|fonts|pdfs|others|misc)($|\/)+/).nil?
         self.folder = File.join(self.content_type.to_s.pluralize, self.folder)
       end
     end
@@ -101,15 +99,6 @@ module Locomotive
         file.content_type = File.mime_type?(file.path) if file.content_type.nil?
         self.source       = file
         self.changed_attributes['source_filename'] = nil # delete the old file
-      end
-    end
-
-    def content_type_can_not_change
-      if self.persisted?
-        # FIXME: content type used to be a String
-        if self.content_type_was.to_sym != self.content_type
-          self.errors.add(:source, :extname_changed)
-        end
       end
     end
 

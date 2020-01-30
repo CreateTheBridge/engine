@@ -3,7 +3,7 @@ module Locomotive
 
     source_root File.expand_path('../../../../../', __FILE__)
 
-    class_option :heroku, type: :boolean, default: false, description: 'if the Engine runs on Heroku'
+    class_option :heroku, type: :boolean, default: false, description: 'if the Engine is supposed to run on Heroku'
 
     def copy_initializers
       @source_paths = nil # reset it for the find_in_source_paths method
@@ -12,17 +12,27 @@ module Locomotive
 
       template 'locomotive.rb', 'config/initializers/locomotive.rb'
 
-      template 'devise.rb', 'config/initializers/devise.rb'
-
       template 'dragonfly.rb', 'config/initializers/dragonfly.rb'
-
-      template 'mongoid.yml', 'config/mongoid.yml'
     end
 
     def install_aws
       if options.heroku? || yes?('Do you want to store your assets on Amazon S3?')
         template 'carrierwave_aws.rb', 'config/initializers/carrierwave.rb'
         gem 'carrierwave-aws'
+        gem 'rack-cors', require: 'rack/cors'
+        inject_into_file 'Gemfile', after: "# the framework and any gems in your application.\n" do <<-RUBY
+
+    config.assets.initialize_on_precompile = false
+
+    config.middleware.insert_before ActionDispatch::Static, Rack::Cors do
+      allow do
+        origins '*'
+        resource '/assets/*', headers: :any, methods: :any
+      end
+    end
+
+        RUBY
+        end
       else
         template 'carrierwave.rb', 'config/initializers/carrierwave.rb'
       end
@@ -45,7 +55,7 @@ module Locomotive
         inject_into_file 'Gemfile', after: "source 'https://rubygems.org'\n" do <<-'RUBY'
 
 if ENV['HEROKU_APP_NAME']
-  ruby '2.2.2'
+  ruby '2.6.2'
 end
         RUBY
         end
@@ -67,7 +77,7 @@ end
         RUBY
         end
 
-        gem 'platform-api', '~> 2'
+        gem 'platform-api', '~> 2.2.0'
       end
     end
 
@@ -75,12 +85,8 @@ end
       remove_file 'public/index.html'
     end
 
-    def use_puma_as_app_server
-      inject_into_file 'Gemfile', after: "# gem 'unicorn'\n" do <<-'RUBY'
-# Use Puma as the app server
-gem 'puma'
-      RUBY
-      end
+    def remove_robots_txt
+      remove_file 'public/robots.txt'
     end
 
     def show_readme

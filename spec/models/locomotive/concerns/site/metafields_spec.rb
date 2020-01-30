@@ -1,4 +1,4 @@
-require 'spec_helper'
+# encoding: utf-8
 
 describe Locomotive::Concerns::Site::Metafields do
 
@@ -63,6 +63,20 @@ describe Locomotive::Concerns::Site::Metafields do
 
         let(:schema) { [{ 'label' => 'Social', 'fields' => [{ 'name' => 'method_missing', 'type' => 'string' }] }] }
         it { is_expected.to eq(["The property '#/0/fields/0/name' of type string matched the disallowed schema"]) }
+
+      end
+
+      context 'namespace with a hyphen' do
+
+        let(:schema) { [{ 'name' => 'social-links', 'label' => 'Social', 'fields' => [{ 'name' => 'facebook', 'type' => 'string' }] }] }
+        it { is_expected.to eq(["The property '#/0/name' value \"social-links\" did not match the regex '^[A-Za-z0-9_]+$'"]) }
+
+      end
+
+      context 'field name with a hyphen' do
+
+        let(:schema) { [{ 'name' => 'social_links', 'label' => 'Social', 'fields' => [{ 'name' => 'facebook-url', 'type' => 'string' }] }] }
+        it { is_expected.to eq(["The property '#/0/fields/0/name' value \"facebook-url\" did not match the regex '^[A-Za-z0-9_]+$'"]) }
 
       end
 

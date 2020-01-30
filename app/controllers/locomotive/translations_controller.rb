@@ -3,7 +3,9 @@ module Locomotive
 
     account_required & within_site
 
-    before_filter :load_translation, only: [:edit, :update]
+    before_action :load_translation, only: [:edit, :update]
+
+    helper_method :translation_nav_params
 
     def index
       authorize Translation
@@ -18,11 +20,17 @@ module Locomotive
 
     def update
       authorize @translation
-      service.update(@translation, translation_params[:values])
-      respond_with @translation, location: translations_path(current_site, params[:_location])
+      service.update(@translation, translation_params[:values].to_h)
+      respond_with @translation, location: translations_path(current_site, translation_nav_params)
     end
 
-    private
+    def bulk_destroy
+      authorize Translation, :destroy?
+      service.bulk_destroy(params[:ids].split(','))
+      respond_with current_site, location: translations_path(current_site, translation_nav_params)
+    end
+
+    protected
 
     def load_translation
       @translation = current_site.translations.find(params[:id])
@@ -30,6 +38,10 @@ module Locomotive
 
     def translation_params
       params.require(:translation).permit(values: current_site.locales)
+    end
+
+    def translation_nav_params
+      params.permit(:filter_by, :q, :page, :per_page)
     end
 
     def service

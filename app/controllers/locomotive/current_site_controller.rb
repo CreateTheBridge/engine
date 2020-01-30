@@ -5,12 +5,12 @@ module Locomotive
 
     localized
 
-    before_filter :load_site
+    before_action :load_site
 
     helper Locomotive::SitesHelper
 
-    before_filter :ensure_domains_list, only: :update
-    before_filter :ensure_url_redirections, only: :update
+    before_action :ensure_domains_list, only: :update
+    before_action :ensure_url_redirections, only: :update
 
     def edit
       authorize @site
@@ -63,7 +63,13 @@ module Locomotive
     end
 
     def site_params
-      params.require(:site).permit(*policy(@site || Site).permitted_attributes)
+      params.require(:site).permit(*policy(@site || Site).permitted_attributes).tap do |_params|
+        if params[:site][:url_redirections_expert_mode] == '1'
+          _params[:url_redirections] = params[:site][:url_redirections_plain_text]
+          .split("\n")
+          .map { |line| line.split(/\s+/) }
+        end
+      end
     end
 
     def service

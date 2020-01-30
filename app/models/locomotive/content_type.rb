@@ -20,16 +20,19 @@ module Locomotive
     field :name
     field :description
     field :slug
-    field :algolia_indexing_enabled,    type: Boolean,  default: false
-    field :label_field_id,              type: BSON::ObjectId
+    field :algolia_indexing_enabled,            type: Boolean,  default: false
+    field :label_field_id,                      type: BSON::ObjectId
     field :label_field_name
-    field :group_by_field_id,           type: BSON::ObjectId
+    field :tree_parent_field_name
+    field :group_by_field_id,                   type: BSON::ObjectId
     field :order_by # either a BSON::ObjectId (field id) or a String (:_position, ...etc)
-    field :order_direction,             default: 'asc'
-    field :public_submission_enabled,   type: Boolean,  default: false
-    field :public_submission_accounts,  type: Array,    default: []
+    field :order_direction,                     default: 'asc'
+    field :public_submission_enabled,           type: Boolean,  default: false
+    field :public_submission_email_attachments, type: Boolean,  default: false
+    field :public_submission_accounts,          type: Array,    default: []
+    field :recaptcha_required,                  type: Boolean,  default: false
     field :number_of_entries
-    field :display_settings,            type: Hash
+    field :display_settings,                    type: Hash
 
     ## associations ##
     has_many :entries,   class_name: 'Locomotive::ContentEntry', dependent: :destroy
@@ -96,6 +99,12 @@ module Locomotive
       _field || self.entries_custom_fields.where(name: id_or_name).first
     end
 
+    # Tell if a field has to be displayed in the UI
+    #
+    def is_field_with_ui_enabled?(id_or_name)
+      self.find_entries_custom_field(id_or_name)&.ui_enabled?
+    end
+
     # A localized content type owns at least one localized field.
     def localized?
       self.entries_custom_fields.where(localized: true).count > 0
@@ -130,15 +139,11 @@ module Locomotive
     def bubble_fields_errors_up
       return if self.errors[:entries_custom_fields].empty?
 
-      hash = { base: self.errors[:entries_custom_fields] }
-
       self.entries_custom_fields.each do |field|
-        next if field.valid?
+        next if field.errors.blank?
         key = field.persisted? ? field._id.to_s : field.position.to_i
-        hash[key] = field.errors.to_a
+        self.errors.add(:entries_custom_fields, :invalid, message: "##{key}: #{field.errors.full_messages.first}")
       end
-
-      self.errors.set(:entries_custom_fields, hash)
     end
 
     # Makes sure the class_name filled in a belongs_to or has_many field

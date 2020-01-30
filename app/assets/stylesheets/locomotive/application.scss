@@ -1,11 +1,13 @@
-//= require select2/select2
-//= require eonasdan-bootstrap-datetimepicker/bootstrap-datetimepicker
-//= require select2-bootstrap-css/select2-bootstrap
-//= require bootstrap-tagsinput/bootstrap-tagsinput
+//= require locomotive/select2
+//= require locomotive/bootstrap-datetimepicker
+//= require locomotive/select2-bootstrap
+//= require locomotive/bootstrap-tagsinput
 //= require locomotive/cropper
 //= require locomotive/bootstrap-switch
 //= require locomotive/bootstrap-colorpicker
 //= require locomotive/highlightjs/github
+//= require locomotive/nprogress
+//= require locomotive/nprogress-bootstrap
 
 // Bootstrap overrides
 // =============================================================================
@@ -67,14 +69,6 @@
 @import "bootstrap/utilities";
 @import "bootstrap/responsive-utilities";
 
-// Custom components
-// =============================================================================
-
-// Vendor
-
-@import "nprogress";
-@import "nprogress-bootstrap";
-
 // Layout
 
 @import "new/actionbar";
@@ -109,6 +103,7 @@
 
 @import "old/search_bars";
 @import "new/notify";
+@import "new/checkbox";
 @import "old/list";
 @import "old/content_assets";
 @import "old/translations";

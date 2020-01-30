@@ -5,7 +5,7 @@ module Locomotive
 
     respond_to :json, only: [:regenerate_api_key]
 
-    before_filter :load_account
+    before_action :load_account
 
     layout '/locomotive/layouts/account'
 
@@ -16,7 +16,12 @@ module Locomotive
 
     def update
       authorize @account
-      @account.update_attributes(account_params)
+      if needs_password?
+        @account.update_with_password(account_params)
+      else
+        @account.update_attributes(account_params)
+      end
+      params[:active_tab] = 'credentials' if @account.errors.include?(:current_password)
       respond_with @account, location: edit_my_account_path(anchor: params[:active_tab])
     end
 
@@ -33,7 +38,19 @@ module Locomotive
     end
 
     def account_params
-      params.require(:account).permit(:name, :email, :password, :password_confirmation, :avatar, :remove_avatar, :locale)
+      params.require(:account).permit(
+        :name, :email, :current_password, :password, :password_confirmation,
+        :avatar, :remove_avatar, :locale
+      )
+    end
+
+    def needs_password?
+      email_update_requested? || params[:account][:password].present?
+    end
+
+    def email_update_requested?
+      params[:account][:email].present? &&
+      params[:account][:email] != current_locomotive_account.email
     end
 
   end

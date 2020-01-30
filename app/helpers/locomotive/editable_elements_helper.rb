@@ -41,7 +41,7 @@ module Locomotive
     end
 
     def nice_editable_elements_path
-      preview_page_path(@page)
+      nice_preview_page_path(@page)
     end
 
     def options_for_page_blocks(blocks)
@@ -52,6 +52,7 @@ module Locomotive
         end)
     end
 
+    # FIXME: editable elements will disappear so this method will
     def page_locale_picker_link(page, content_entry)
       service = Locomotive::Steam::Services.build_instance
       _page   = Locomotive::Steam::Decorators::PageDecorator.new(page.to_steam, current_content_locale, current_site.default_locale)

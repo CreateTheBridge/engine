@@ -11,8 +11,8 @@ Locomotive::Steam.configure do |config|
 
   if asset_host = CarrierWave::Uploader::Base.asset_host # CDN?
     config.asset_host = asset_host
-  elsif asset_host = CarrierWave.base_host # Example: AWS storage
-    config.asset_host = asset_host
+  elsif asset_host = CarrierWave.base_host # Example: AWS S3 / Google Cloud storage
+    config.asset_host = asset_host.ends_with?('/') ? asset_host : "#{asset_host}/"
   else # Example: File storage
     config.asset_path = Rails.root.join('public').to_s
   end
@@ -32,7 +32,7 @@ Locomotive::Steam.configure do |config|
   require_relative 'steam/middlewares/catch_error'
   config.middleware.insert_after Locomotive::Steam::Middlewares::Site, Locomotive::Steam::Middlewares::CatchError
 
-  %w(cache page_editing missing_translations wysihtml_css).each do |name|
+  %w(page_editing missing_translations wysihtml_css).each do |name|
     require_relative "steam/middlewares/#{name}"
     config.middleware.insert_after Locomotive::Steam::Middlewares::Page, Locomotive::Steam::Middlewares.const_get(name.camelize)
   end

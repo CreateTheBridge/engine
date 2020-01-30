@@ -1,16 +1,17 @@
 module Locomotive
   module CustomFieldsHelper
 
-    # Render all the form inputs based on the fields of a content type.
+    # Render all the form inputs of a given group based on the fields of a content type.
     #
     # @param [ Object ] content_type The content type the fields belong to
     # @param [ Object ] form The SimpleForm form instance
+    # @param [ Object ] group The group that will be rendered
     #
     # @return [ String ] The form inputs
     #
-    def render_custom_fields(content_type, form)
+    def render_custom_fields(content_type, form, group)
       html = content_type.ordered_entries_custom_fields.map do |field|
-        if field.ui_enabled? || field.name == content_type.label_field_name
+        if (field.ui_enabled? || field.name == content_type.label_field_name) && field.group == group
           render_custom_field(field, form)
         else
           ''
@@ -52,9 +53,10 @@ module Locomotive
 
     def default_custom_field_options(field, form, highlighted)
       {
-        name:   field.name,
-        label:  label_for_custom_field(form.object, field),
-        hint:   field.hint,
+        name:     field.name,
+        label:    label_for_custom_field(form.object, field),
+        hint:     field.hint,
+        required: field.required,
         input_html: {
           class: "#{'input-lg' if highlighted}"
         }
@@ -159,6 +161,7 @@ module Locomotive
     def select_custom_field_options(field, entry)
       {
         name:         "#{field.name}_id",
+        error_name:   field.name,
         as:           :editable_select,
         wrapper_html: { class: 'select' },
         collection:   field.ordered_select_options.map { |option| [option.name, option.id] },
@@ -211,6 +214,7 @@ module Locomotive
 
     def custom_field_picker_options(field, slug)
       {
+        id:           slug,
         label_method: :_label,
         list_url:     content_entries_path(current_site, slug, format: :json),
         placeholder:  custom_field_t(:placeholder, field.type, name: field.label.downcase),

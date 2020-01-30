@@ -1,5 +1,5 @@
 module Locomotive
-  class ContentEntryService < Struct.new(:content_type, :account)
+  class ContentEntryService < Struct.new(:content_type, :account, :locale)
     include Locomotive::Concerns::AlgoliaService
     include Locomotive::Concerns::ActivityService
 
@@ -74,7 +74,7 @@ module Locomotive
     # A notification email is sent to the selected members of the site.
     #
     # @param [ Hash ] attributes The attributes of new content entry.
-    # @param [ Hash ] options For now, only store the ip address of the person who submitted the content entry.
+    # @param [ Hash ] options For now, only store the ip address of the person who submitted the content entry + other accounts
     #
     # @return [ Object ] An instance of the content entry.
     #
@@ -83,10 +83,11 @@ module Locomotive
 
       without_tracking_activity { create(form.serializable_hash) }.tap do |entry|
         if entry.errors.empty?
-          # send an email to selected local accounts
-          send_notifications(entry)
+          # send an email to selected local accounts + potential external accounts described by their emails
+          send_notifications(entry, options[:emails])
 
-          track_activity 'content_entry.created_public', parameters: activity_parameters(entry)
+
+          track_activity 'content_entry.created_public', locale: locale, parameters: activity_parameters(entry)
           add_to_algolia entry
         end
       end
@@ -108,7 +109,7 @@ module Locomotive
         entry.updated_by = account
 
         if entry.save
-          track_activity 'content_entry.updated', parameters: activity_parameters(entry)
+          track_activity 'content_entry.updated', locale: locale, parameters: activity_parameters(entry)
           add_to_algolia entry
         end
       end
@@ -131,9 +132,26 @@ module Locomotive
       end
     end
 
+    # Destroy all the entries described by their id
+    def bulk_destroy(ids)
+      content_type.entries.where(:_id.in => ids).map do |entry|
+        entry.destroy
+        entry._label
+      end.tap do |labels|
+        track_activity 'content_entry.destroyed_bulk',
+          parameters: activity_parameters.merge(labels: labels)
+      end
+    end
+
+    # Destroy all the entries of a content type.
+    # Runs each entry's destroy callbacks.
+    #
+    def destroy_all
+      content_type.entries.destroy_all
+    end
+
     # Make sure the content entries has a non-blank slug in the new locales.
     # We take the slug in the default locale or the previous default locale (if provided)
-    # in the other locales.
     #
     def localize(new_locales, previous_default_locale)
       default_locale = previous_default_locale || content_type.site.default_locale
@@ -153,21 +171,13 @@ module Locomotive
       end
     end
 
-    # Destroy all the entries of a content type.
-    # Runs each entry's destroy callbacks.
-    #
-    def destroy_all
-      content_type.entries.destroy_all
-    end
-
-    def send_notifications(entry)
+    def send_notifications(entry, emails = nil)
       return unless self.content_type.public_submission_enabled?
 
-      account_ids = (self.content_type.public_submission_accounts || []).map(&:to_s)
-
-      self.content_type.site.accounts.each do |account|
-        next unless account_ids.include?(account._id.to_s)
-
+      Locomotive::Account.any_of(
+        { :_id.in   => self.content_type.public_submission_accounts || [] },
+        { :email.in => emails || [] }
+      ).each do |account|
         Locomotive::Notifications.new_content_entry(account, entry).deliver
       end
     end
@@ -189,8 +199,8 @@ module Locomotive
       referenced  = {}
 
       # has_many
-      has_many = _entry.has_many_custom_fields.each do |n, inverse_of|
-        referenced["#{n}_attributes"] = [:_id, :_destroy, :"position_in_#{inverse_of}"]
+      has_many = _entry.has_many_custom_fields.each do |name, inverse_of|
+        referenced["#{name}_attributes"] = [:_id, :_destroy, :"position_in_#{inverse_of}"]
       end
 
       # many_to_many
@@ -213,7 +223,10 @@ module Locomotive
 
       # if the user deletes all the entries of a many_to_many field,
       # make sure the list gets empty instead of nil.
-      _entry.many_to_many_custom_fields.each do |(_, s)|
+      _entry.many_to_many_custom_fields.each do |(n, s)|
+        next unless content_type.is_field_with_ui_enabled?(n)
+
+        # we don't want to clear the relationship with the form doesn't display the field
         attributes[s] = [] unless attributes.has_key?(s)
       end
     end

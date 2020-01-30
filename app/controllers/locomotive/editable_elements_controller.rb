@@ -1,3 +1,4 @@
+# @deprecated
 module Locomotive
   class EditableElementsController < BaseController
 
@@ -5,15 +6,15 @@ module Locomotive
 
     localized
 
-    before_filter :load_page
-    after_filter  :store_location_if_content_entry
+    before_action :load_page
+    after_action  :store_location_if_content_entry
 
     layout :editable_elements_layout
 
     def index
       authorize @page
 
-      @editable_elements = parsing_service.find_or_create_editable_elements(@page)
+      @editable_elements = parsing_service.find_all_elements(@page)[:elements]
 
       respond_with(@page) do |format|
         format.html { render_index }
@@ -64,7 +65,7 @@ module Locomotive
     end
 
     def persisting_service
-      @persisting_service ||= Locomotive::EditableElementService.new(current_site, current_locomotive_account)
+      @persisting_service ||= Locomotive::EditableElementService.new(current_site, current_locomotive_account, current_content_locale)
     end
 
     def store_location_if_content_entry
