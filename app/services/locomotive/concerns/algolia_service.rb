@@ -80,7 +80,7 @@ module Locomotive
         return unless content_entry.content_type.algolia_indexing_enabled
 
         algolia_client
-        index = Algolia::Index.new(content_entry.content_type.slug)
+        index = Algolia::Index.new("#{content_entry.content_type.slug}--#{content_entry.site.handle}")
         index.delete_object(content_entry._slug)
       end
 
