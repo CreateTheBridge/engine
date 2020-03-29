@@ -70,10 +70,12 @@ module Locomotive
         return unless content_entry.content_type.algolia_indexing_enabled
 
         algolia_client
-        index = Algolia::Index.new("#{content_entry.content_type.slug}--#{content_entry.site.handle}")
-        result = serialize_object(content_entry)
-        puts JSON.pretty_generate(result)
-        index.save_object(result)
+        site.each_locale do |locale|
+          index = Algolia::Index.new("#{content_entry.content_type.slug}--#{locale}--#{content_entry.site.handle}")
+          result = serialize_object(content_entry)
+          puts JSON.pretty_generate(result)
+          index.save_object(result)
+        end
       end
 
       def remove_from_algolia(content_entry)
